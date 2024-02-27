@@ -7,38 +7,36 @@ import numpy as np
 
 app = Flask(__name__)
 
-#camera = cv2.VideoCapture(0)
-
 model = YOLO("yolov8n-face.pt")
-## Model part ###
-# vid_path = "demo1.mp4"
-# results_video = model.predict(source=vid_path, show=False)
-# camera = cv2.VideoCapture(vid_path)
-################
+camera = cv2.VideoCapture(0)
 
-# def detect_faces():
-#     for imgVid in results_video:
-#         success, frame = camera.read()
+# Face detection from video #
+def video_faces():
+    vid_path = "demo1.mp4"   # path to video
+    results_video = model.predict(source=vid_path, show=False)  # detecting faces in video
+    camera = cv2.VideoCapture(vid_path)
+    for imgVid in results_video:
+        success, frame = camera.read()
         
-#         if not success:
-#             break
-#         else:
-#             face_result_vid = np.array(imgVid)
+        if not success:
+            break
+        else:
+            face_result_vid = np.array(imgVid)
 
-#             for face_vid in face_result_vid:
-#                 x1, y1, x2, y2, acc, _ = face_vid
-#                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-#                 imageVid = cv2.rectangle(frame, (x1, y1), (x2,y2), (0, 255, 0), 1)
-#                 cv2.putText(imageVid, str(acc), (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+            for face_vid in face_result_vid:
+                x1, y1, x2, y2, acc, _ = face_vid
+                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                imageVid = cv2.rectangle(frame, (x1, y1), (x2,y2), (0, 255, 0), 1)
+                cv2.putText(imageVid, str(acc), (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
-#             ret, buffer = cv2.imencode('.jpg', frame)
-#             frame = buffer.tobytes()
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
 
-#         yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 # Real Time Face detection on webcam
-camera = cv2.VideoCapture(0)
-def real_time_Faces():  
+def real_time_Faces():
+    camera = cv2.VideoCapture(0)  
     while True:
         success, frame = camera.read()
 
@@ -61,7 +59,7 @@ def real_time_Faces():
         
         yield(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
   
-
+# webcam testing
 def generate_frames():
     while True:
         success, frame = camera.read()
@@ -77,11 +75,17 @@ def generate_frames():
 
 @app.route('/')
 def index():
+    if not camera.release():
+        camera.release()
     return render_template('index.html')
+
+@app.route('/live')
+def live():
+    return render_template('live.html')
 
 @app.route('/video')
 def video():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(real_time_Faces(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
