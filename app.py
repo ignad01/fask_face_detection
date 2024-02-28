@@ -4,7 +4,7 @@ from ultralytics import YOLO
 import numpy as np
 
 app = Flask(__name__)
-
+camera = cv2.VideoCapture(-1) 
 model = YOLO("yolov8n-face.pt")
 # Real Time Face detection on webcam
 def real_time_Faces():
