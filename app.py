@@ -46,7 +46,11 @@ def real_time_Faces():
             cv2.imwrite("sample.jpg", frame)
             path = 'sample.jpg'
             result_frame = model.predict(source=path, show=False)
-            face_result_vid = np.array(result_frame[0])
+            boxes = result_frame[0].boxes
+            boxIndx = []
+            for box in boxes:
+                boxIndx.append(box.data.tolist()[0])
+            face_result_vid = np.array(boxIndx)
 
             for face_vid in face_result_vid:
                 x1, y1, x2, y2, acc, _ = face_vid
