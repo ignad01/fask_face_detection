@@ -90,6 +90,3 @@ def live():
 @app.route('/video')
 def video():
     return Response(real_time_Faces(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-if __name__ == '__main__':
-    app.run(debug=True)
